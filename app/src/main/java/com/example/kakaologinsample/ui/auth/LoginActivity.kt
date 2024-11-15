@@ -28,36 +28,44 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
+        setClickEvent()
         observeResult()
+        observeIsTokenExist()
+        observeToastMessage(loginViewModel)
 
-        mBinding.btnLogin.setOnClickListener { loginViewModel.loginWithKakao() }
+        loginViewModel.checkSavedTokens() // 앱 시작 시 토큰 존재 여부 확인
     }
 
+    /**
+     * 로그인 결과값 관찰
+     */
     private fun observeResult() {
         lifecycleScope.launch {
-            loginViewModel.loginResult.collect { result ->
-                when (result?.isSuccess) {
-                    true -> {
-                        val token = result.getOrNull()
-                        if(token != null) {
-                            LogUtil.d("로그인 성공")
-                            LogUtil.i("Get Token ::\n" +
-                                    "accessToken : ${token.accessToken}\n" +
-                                    "refreshToken : ${token.refreshToken}")
-                            startActivity(Intent(mContext, LoginSuccessActivity::class.java))
-                        } else {
-                            LogUtil.w("로그인 실패")
-                        }
-                    }
-                    else -> {
-                        val exception = result?.exceptionOrNull()
-                        exception?.let {
-                            LogUtil.e("로그인 실패!!", it)
-                        }
-                    }
+            loginViewModel.loginResult.collect { token ->
+                if(token != null) {
+                    LogUtil.i("Get Token ::\n" +
+                            "accessToken : ${token.accessToken}\n" +
+                            "refreshToken : ${token.refreshToken}")
                 }
             }
         }
+    }
+
+    /**
+     * 저장된 토큰값 있는지 확인한 결과 관찰
+     */
+    private fun observeIsTokenExist() {
+        loginViewModel.isExistToken.observe(this) {
+            if(it) { // 저장된 토큰값이 존재할 경우
+                startActivity(Intent(mContext, LoginSuccessActivity::class.java))
+            }
+        }
+    }
+
+    /**
+     * 클릭이벤트 정의
+     */
+    private fun setClickEvent() {
+        mBinding.btnLogin.setOnClickListener { loginViewModel.loginWithKakao() }
     }
 }

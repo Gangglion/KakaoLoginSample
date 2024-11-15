@@ -1,6 +1,7 @@
 [versions]
 agp = "8.5.1"
 compiler = "4.11.0"
+datastorePreferences = "1.1.1"
 glide = "4.16.0"
 hiltAndroid = "2.51.1"
 kotlin = "1.9.0"
@@ -19,6 +20,7 @@ v2User = "2.20.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }

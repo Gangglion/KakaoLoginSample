@@ -75,6 +75,8 @@ dependencies {
     // glide
     implementation(libs.glide)
     implementation(libs.compiler)
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

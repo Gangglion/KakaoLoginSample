@@ -1,11 +1,9 @@
 package com.example.kakaologinsample.ui.success
 
 import androidx.lifecycle.viewModelScope
-import com.example.kakaologinsample.data.local.model.UserToken
-import com.example.kakaologinsample.data.repository.UserTokenDbRepository
 import com.example.kakaologinsample.domain.model.UserInfo
 import com.example.kakaologinsample.domain.usecase.KakaoAuthUseCase
-import com.example.kakaologinsample.domain.usecase.UserTokenDbUseCase
+import com.example.kakaologinsample.domain.usecase.UserPrefUseCase
 import com.example.kakaologinsample.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,16 +14,36 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginSuccessViewModel @Inject constructor(
     private val kakaoAuthUseCase: KakaoAuthUseCase,
-    private val userTokenDbUseCase: UserTokenDbUseCase
+    private val userPrefUseCase: UserPrefUseCase
 ) : BaseViewModel() {
 
-    private val _userInfoResult = MutableStateFlow<Result<UserInfo?>?>(null)
-    val userInfoResult: StateFlow<Result<UserInfo?>?> = _userInfoResult
+    private val _userInfoResult = MutableStateFlow<UserInfo?>(null)
+    val userInfoResult: StateFlow<UserInfo?> = _userInfoResult
 
     fun getUserInfo() {
         viewModelScope.launch {
-            val userInfo = kakaoAuthUseCase.getUserInfo()
-            _userInfoResult.value = userInfo
+            val result = kakaoAuthUseCase.getUserInfo()
+            when(result.isSuccess) {
+                true -> {
+                    val userInfo = result.getOrNull()
+                    if(userInfo != null) {
+                        _userInfoResult.value = userInfo
+                        // 가져온 사용자 Id DataStore 에 저장
+                        userPrefUseCase.saveUserId(_userInfoResult.value!!.id!!)
+                    } else {
+                        updateToastMsg("사용자 정보 가져오기 실패")
+                        // 사용자 정보 가져오기 실패 시, DataStore 에 저장된 값 전부 제거
+                        userPrefUseCase.clearAllPrefs()
+                        updateIsFinish(true)
+                    }
+                }
+                false -> {
+                    updateToastMsg("사용자 정보 가져오기 실패")
+                    // 사용자 정보 가져오기 실패 시, DataStore 에 저장된 값 전부 제거
+                    userPrefUseCase.clearAllPrefs()
+                    updateIsFinish(true)
+                }
+            }
         }
     }
 
@@ -34,10 +52,11 @@ class LoginSuccessViewModel @Inject constructor(
             val result = kakaoAuthUseCase.logout().getOrNull()
             if(result != null && result == true) {
                 updateToastMsg("로그아웃 성공. SDK 에서 토큰 삭제됨")
+                userPrefUseCase.clearAllPrefs()
                 updateIsFinish(true)
             } else {
                 updateToastMsg("로그아웃 실패. SDK 에서 토큰 삭제됨")
-                updateIsFinish(false)
+                updateIsFinish(true)
             }
         }
     }
@@ -47,10 +66,11 @@ class LoginSuccessViewModel @Inject constructor(
             val result = kakaoAuthUseCase.unlink().getOrNull()
             if(result != null && result == true) {
                 updateToastMsg("연결끊기 성공. SDK 에서 토큰 삭제됨")
+                userPrefUseCase.clearAllPrefs()
                 updateIsFinish(true)
             } else {
                 updateToastMsg("연결끊기 실패. SDK 에서 토큰 삭제됨")
-                updateIsFinish(false)
+                updateIsFinish(true)
             }
         }
     }

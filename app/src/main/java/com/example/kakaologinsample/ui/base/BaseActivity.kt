@@ -23,12 +23,18 @@ abstract class BaseActivity<T: ViewDataBinding>(private val layoutResId: Int): A
         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show()
     }
 
+    /**
+     * 토스트 메시지 관찰
+     */
     protected fun observeToastMessage(viewModel: BaseViewModel) {
         viewModel.toastMsg.observe(this) { msg ->
             if(msg.isNotBlank()) showToast(msg)
         }
     }
 
+    /**
+     * 종료 플래그 관찰
+     */
     protected fun observeFinish(viewModel: BaseViewModel) {
         viewModel.isFinish.observe(this) { isFinish ->
             if(isFinish) finish()

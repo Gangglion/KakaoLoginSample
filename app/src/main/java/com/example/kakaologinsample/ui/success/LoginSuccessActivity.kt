@@ -9,10 +9,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.kakaologinsample.R
-import com.example.kakaologinsample.data.local.model.UserToken
+import com.example.kakaologinsample.databinding.ActivityLoginSuccessBinding
 import com.example.kakaologinsample.domain.model.UserInfo
 import com.example.kakaologinsample.ui.base.BaseActivity
-import com.example.kakaologinsample.databinding.ActivityLoginSuccessBinding
 import com.example.kakaologinsample.util.LogUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -50,25 +49,14 @@ class LoginSuccessActivity : BaseActivity<ActivityLoginSuccessBinding>(R.layout.
 
     private fun observeUserInfo() {
         lifecycleScope.launch {
-            loginSuccessViewModel.userInfoResult.collect { result ->
-                LogUtil.v(result.toString())
-                when (result?.isSuccess) {
-                    true -> {
-                        result.getOrNull()?.let { userInfo ->
-                            LogUtil.d("사용자 정보 가져오기 성공!!\n" +
-                                    "$userInfo")
-                            setData(userInfo)
-                            showEmptyDataScreen(false)
-                        } ?: run {
-                            showEmptyDataScreen(true)
-                        }
-                    }
-                    false -> {
-                        showEmptyDataScreen(true)
-                    }
-                    else -> {
-                        showEmptyDataScreen(true)
-                    }
+            loginSuccessViewModel.userInfoResult.collect { userInfo ->
+                if(userInfo != null) {
+                    LogUtil.d("사용자 정보 가져오기 성공!!\n" +
+                            "$userInfo")
+                    setData(userInfo)
+                    showEmptyDataScreen(false)
+                } else {
+                    showEmptyDataScreen(true)
                 }
             }
         }

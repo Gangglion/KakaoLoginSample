@@ -1,5 +1,6 @@
 package com.example.kakaologinsample.ui.auth
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -25,9 +26,9 @@ class LoginViewModel @Inject constructor(
     private val _loginResult = MutableStateFlow<OAuthToken?>(null)
     val loginResult: StateFlow<OAuthToken?> = _loginResult
 
-    fun loginWithKakao() {
+    fun loginWithKakao(context: Context) {
         viewModelScope.launch {
-            val result = kakaoAuthUseCase.login()
+            val result = kakaoAuthUseCase.login(context)
             when(result.isSuccess) {
                 true -> {
                     val oauthToken = result.getOrNull()

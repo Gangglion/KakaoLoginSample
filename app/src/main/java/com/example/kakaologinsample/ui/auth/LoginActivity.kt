@@ -66,6 +66,6 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
      * 클릭이벤트 정의
      */
     private fun setClickEvent() {
-        mBinding.btnLogin.setOnClickListener { loginViewModel.loginWithKakao() }
+        mBinding.btnLogin.setOnClickListener { loginViewModel.loginWithKakao(mContext) }
     }
 }

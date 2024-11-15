@@ -10,6 +10,7 @@ import androidx.databinding.ViewDataBinding
 abstract class BaseActivity<T: ViewDataBinding>(private val layoutResId: Int): AppCompatActivity() {
     protected lateinit var mBinding: T
     protected lateinit var mContext: Context
+    private var mToast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,8 +20,8 @@ abstract class BaseActivity<T: ViewDataBinding>(private val layoutResId: Int): A
         mContext = this
     }
 
-    fun showToast(msg: String) {
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show()
+    private fun makeToast(msg: String) {
+        mToast = Toast.makeText(mContext, msg, Toast.LENGTH_SHORT)
     }
 
     /**
@@ -28,7 +29,11 @@ abstract class BaseActivity<T: ViewDataBinding>(private val layoutResId: Int): A
      */
     protected fun observeToastMessage(viewModel: BaseViewModel) {
         viewModel.toastMsg.observe(this) { msg ->
-            if(msg.isNotBlank()) showToast(msg)
+            if(msg.isNotBlank()) {
+                mToast?.cancel()
+                makeToast(msg)
+                mToast?.show()
+            }
         }
     }
 

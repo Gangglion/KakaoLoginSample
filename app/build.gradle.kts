@@ -75,9 +75,6 @@ dependencies {
     // glide
     implementation(libs.glide)
     implementation(libs.compiler)
-    // Room
-    implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

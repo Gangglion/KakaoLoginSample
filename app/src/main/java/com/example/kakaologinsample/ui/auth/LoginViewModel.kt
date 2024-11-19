@@ -5,9 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.kakaologinsample.data.repository.kakao.model.Token
-import com.example.kakaologinsample.data.repository.kakao.repository.KakaoRepository
-import com.example.kakaologinsample.domain.usecase.UserPrefUseCase
+import com.example.kakaologinsample.data.datastore.repository.DataStoreRepository
+import com.example.kakaologinsample.data.kakao.model.Token
+import com.example.kakaologinsample.data.kakao.repository.KakaoRepository
 import com.example.kakaologinsample.ui.auth.LoginUiState.Error
 import com.example.kakaologinsample.ui.auth.LoginUiState.Success
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val kakaoRepository: KakaoRepository,
-    private val userPrefUseCase: UserPrefUseCase
+    private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
     private val _uiState = MutableLiveData<LoginUiState>()
     val uiState: LiveData<LoginUiState> = _uiState
@@ -27,8 +27,8 @@ class LoginViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
-            val accessToken = userPrefUseCase.getAccessToken().first()
-            val refreshToken = userPrefUseCase.getRefreshToken().first()
+            val accessToken = dataStoreRepository.accessToken.first()
+            val refreshToken = dataStoreRepository.refreshToken.first()
             if(accessToken != null && refreshToken != null) {
                 _uiState.value = Success(Token(accessToken, refreshToken))
             } else {
@@ -46,7 +46,7 @@ class LoginViewModel @Inject constructor(
                         onSuccess = { token ->
                             _uiState.value = Success(token)
                             if(token != null)
-                                userPrefUseCase.saveUserToken(token.accessToken, token.refreshToken)
+                                dataStoreRepository.saveTokens(token.accessToken, token.refreshToken)
                         },
                         onFailure = { error ->
                             _uiState.value = Error(error)

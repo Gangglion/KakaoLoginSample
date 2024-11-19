@@ -1,6 +1,6 @@
-package com.example.kakaologinsample.data.repository.kakao.mapper
+package com.example.kakaologinsample.data.kakao.mapper
 
-import com.example.kakaologinsample.data.repository.kakao.model.UserInfo
+import com.example.kakaologinsample.data.kakao.model.UserInfo
 import com.kakao.sdk.user.model.User
 
 fun User.toData() = UserInfo(

@@ -1,9 +1,9 @@
-package com.example.kakaologinsample.data.repository.kakao.repository
+package com.example.kakaologinsample.data.kakao.repository
 
 import android.content.Context
-import com.example.kakaologinsample.data.repository.kakao.mapper.toData
-import com.example.kakaologinsample.data.repository.kakao.model.Token
-import com.example.kakaologinsample.data.repository.kakao.model.UserInfo
+import com.example.kakaologinsample.data.kakao.mapper.toData
+import com.example.kakaologinsample.data.kakao.model.Token
+import com.example.kakaologinsample.data.kakao.model.UserInfo
 import com.kakao.sdk.user.UserApiClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

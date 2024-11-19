@@ -1,6 +1,6 @@
-package com.example.kakaologinsample.data.repository.kakao.mapper
+package com.example.kakaologinsample.data.kakao.mapper
 
-import com.example.kakaologinsample.data.repository.kakao.model.Token
+import com.example.kakaologinsample.data.kakao.model.Token
 import com.kakao.sdk.auth.model.OAuthToken
 
 fun OAuthToken.toData() = Token(

@@ -8,7 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.kakaologinsample.R
-import com.example.kakaologinsample.data.repository.kakao.model.UserInfo
+import com.example.kakaologinsample.data.kakao.model.UserInfo
 import com.example.kakaologinsample.databinding.ActivityLoginSuccessBinding
 import com.example.kakaologinsample.ui.base.BaseActivity
 import com.example.kakaologinsample.util.LogUtil

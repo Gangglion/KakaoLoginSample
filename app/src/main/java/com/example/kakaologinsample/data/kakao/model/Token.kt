@@ -1,4 +1,4 @@
-package com.example.kakaologinsample.data.repository.kakao.model
+package com.example.kakaologinsample.data.kakao.model
 
 data class Token(
     val accessToken: String,

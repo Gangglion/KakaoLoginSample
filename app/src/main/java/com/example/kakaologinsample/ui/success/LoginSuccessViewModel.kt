@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.kakaologinsample.data.repository.kakao.model.UserInfo
-import com.example.kakaologinsample.data.repository.kakao.repository.KakaoRepository
-import com.example.kakaologinsample.domain.usecase.UserPrefUseCase
+import com.example.kakaologinsample.data.datastore.repository.DataStoreRepository
+import com.example.kakaologinsample.data.kakao.model.UserInfo
+import com.example.kakaologinsample.data.kakao.repository.KakaoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginSuccessViewModel @Inject constructor(
     private val kakaoRepository: KakaoRepository,
-    private val userPrefUseCase: UserPrefUseCase
+    private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
 
     private val _userInfoState = MutableLiveData<UserInfoState>()
@@ -44,7 +44,7 @@ class LoginSuccessViewModel @Inject constructor(
             kakaoRepository.logout()
                 .catch { UserInfoState.Error(UserInfoState.StateType.Logout, it) }
                 .collect { result ->
-                    userPrefUseCase.clearAllPrefs()
+                    dataStoreRepository.clearAllPrefs()
                     result.fold(
                         onSuccess = {
                             _userInfoState.value = UserInfoState.Success(UserInfoState.StateType.Logout, null)
@@ -62,7 +62,7 @@ class LoginSuccessViewModel @Inject constructor(
             kakaoRepository.unlink()
                 .catch { UserInfoState.Error(UserInfoState.StateType.Unlink, it) }
                 .collect { result ->
-                    userPrefUseCase.clearAllPrefs()
+                    dataStoreRepository.clearAllPrefs()
                     result.fold(
                         onSuccess = {
                             _userInfoState.value = UserInfoState.Success(UserInfoState.StateType.Unlink, null)

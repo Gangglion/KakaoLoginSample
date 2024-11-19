@@ -12,6 +12,7 @@ import com.example.kakaologinsample.databinding.ActivityLoginBinding
 import com.example.kakaologinsample.ui.base.BaseActivity
 import com.example.kakaologinsample.ui.success.LoginSuccessActivity
 import com.example.kakaologinsample.util.LogUtil
+import com.kakao.sdk.user.UserApiClient
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -29,35 +30,27 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
             insets
         }
         setClickEvent()
-        observeResult()
-        observeIsTokenExist()
-        observeToastMessage(loginViewModel)
-
-        loginViewModel.checkSavedTokens() // 앱 시작 시 토큰 존재 여부 확인
+        observeLoginUiState()
     }
 
     /**
-     * 로그인 결과값 관찰
+     * uiState 관찰
      */
-    private fun observeResult() {
-        lifecycleScope.launch {
-            loginViewModel.loginResult.collect { token ->
-                if(token != null) {
-                    LogUtil.i("Get Token ::\n" +
-                            "accessToken : ${token.accessToken}\n" +
-                            "refreshToken : ${token.refreshToken}")
+    private fun observeLoginUiState() {
+        loginViewModel.uiState.observe(this) { uiState ->
+            when(uiState) {
+                is LoginUiState.Loading -> {
+                    LogUtil.d("로딩 중")
                 }
-            }
-        }
-    }
-
-    /**
-     * 저장된 토큰값 있는지 확인한 결과 관찰
-     */
-    private fun observeIsTokenExist() {
-        loginViewModel.isExistToken.observe(this) {
-            if(it) { // 저장된 토큰값이 존재할 경우
-                startActivity(Intent(mContext, LoginSuccessActivity::class.java))
+                is LoginUiState.Success -> {
+                    LogUtil.d("Success :: ${uiState.token}")
+                    if(uiState.token != null) {
+                        startActivity(Intent(mContext, LoginSuccessActivity::class.java))
+                    }
+                }
+                is LoginUiState.Error -> {
+                    LogUtil.e("Error", uiState.throwable)
+                }
             }
         }
     }
@@ -66,6 +59,8 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
      * 클릭이벤트 정의
      */
     private fun setClickEvent() {
-        mBinding.btnLogin.setOnClickListener { loginViewModel.loginWithKakao(mContext) }
+        mBinding.btnLogin.setOnClickListener {
+            loginViewModel.loginWithKakao(mContext)
+        }
     }
 }

@@ -1,66 +1,87 @@
 package com.example.kakaologinsample.ui.success
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.kakaologinsample.domain.model.UserInfo
-import com.example.kakaologinsample.domain.usecase.KakaoAuthUseCase
+import com.example.kakaologinsample.data.repository.kakao.model.UserInfo
+import com.example.kakaologinsample.data.repository.kakao.repository.KakaoRepository
 import com.example.kakaologinsample.domain.usecase.UserPrefUseCase
-import com.example.kakaologinsample.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginSuccessViewModel @Inject constructor(
-    private val kakaoAuthUseCase: KakaoAuthUseCase,
+    private val kakaoRepository: KakaoRepository,
     private val userPrefUseCase: UserPrefUseCase
-) : BaseViewModel() {
+) : ViewModel() {
 
-    private val _userInfoResult = MutableStateFlow<UserInfo?>(null)
-    val userInfoResult: StateFlow<UserInfo?> = _userInfoResult
+    private val _userInfoState = MutableLiveData<UserInfoState>()
+    val userInfoState: LiveData<UserInfoState> = _userInfoState
 
-    fun getUserInfo() {
+    init {
         viewModelScope.launch {
-            val userInfo = kakaoAuthUseCase.getUserInfo()
-            if(userInfo != null) {
-                _userInfoResult.value = userInfo
-                // 가져온 사용자 Id DataStore 에 저장
-                userPrefUseCase.saveUserId(_userInfoResult.value!!.id!!)
-            } else {
-                updateToastMsg("사용자 정보 가져오기 실패")
-                // 사용자 정보 가져오기 실패 시, DataStore 에 저장된 값 전부 제거
-                userPrefUseCase.clearAllPrefs()
-                updateIsFinish(true)
-            }
+            kakaoRepository.getUserInfo()
+                .onStart { _userInfoState.value = UserInfoState.Loading }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { data ->
+                            _userInfoState.value = UserInfoState.Success(UserInfoState.StateType.UserInfo, data)
+                        },
+                        onFailure = { error ->
+                            _userInfoState.value = UserInfoState.Error(UserInfoState.StateType.UserInfo, error)
+                        }
+                    )
+                }
         }
     }
 
     fun logoutFromKakao() {
         viewModelScope.launch {
-            val result = kakaoAuthUseCase.logout().getOrNull()
-            if(result != null && result == true) {
-                updateToastMsg("로그아웃 성공. SDK 에서 토큰 삭제됨")
-                userPrefUseCase.clearAllPrefs()
-                updateIsFinish(true)
-            } else {
-                updateToastMsg("로그아웃 실패. SDK 에서 토큰 삭제됨")
-                updateIsFinish(true)
-            }
+            kakaoRepository.logout()
+                .catch { UserInfoState.Error(UserInfoState.StateType.Logout, it) }
+                .collect { result ->
+                    userPrefUseCase.clearAllPrefs()
+                    result.fold(
+                        onSuccess = {
+                            _userInfoState.value = UserInfoState.Success(UserInfoState.StateType.Logout, null)
+                        },
+                        onFailure = {
+                            _userInfoState.value = UserInfoState.Error(UserInfoState.StateType.Logout, it)
+                        }
+                    )
+                }
         }
     }
 
     fun unlinkFromKakao() {
         viewModelScope.launch {
-            val result = kakaoAuthUseCase.unlink().getOrNull()
-            if(result != null && result == true) {
-                updateToastMsg("연결끊기 성공. SDK 에서 토큰 삭제됨")
-                userPrefUseCase.clearAllPrefs()
-                updateIsFinish(true)
-            } else {
-                updateToastMsg("연결끊기 실패. SDK 에서 토큰 삭제됨")
-                updateIsFinish(true)
-            }
+            kakaoRepository.unlink()
+                .catch { UserInfoState.Error(UserInfoState.StateType.Unlink, it) }
+                .collect { result ->
+                    userPrefUseCase.clearAllPrefs()
+                    result.fold(
+                        onSuccess = {
+                            _userInfoState.value = UserInfoState.Success(UserInfoState.StateType.Unlink, null)
+                        },
+                        onFailure = {
+                            _userInfoState.value = UserInfoState.Error(UserInfoState.StateType.Unlink, it)
+                        }
+                    )
+                }
         }
     }
+}
+
+sealed interface UserInfoState {
+    enum class StateType {
+        UserInfo, Logout, Unlink
+    }
+
+    object Loading: UserInfoState
+    data class Success(val type: StateType, val userInfo: UserInfo?) : UserInfoState
+    data class Error(val type: StateType, val throwable: Throwable) : UserInfoState
 }

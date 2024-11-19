@@ -6,15 +6,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.kakaologinsample.R
+import com.example.kakaologinsample.data.repository.kakao.model.UserInfo
 import com.example.kakaologinsample.databinding.ActivityLoginSuccessBinding
-import com.example.kakaologinsample.domain.model.UserInfo
 import com.example.kakaologinsample.ui.base.BaseActivity
 import com.example.kakaologinsample.util.LogUtil
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LoginSuccessActivity : BaseActivity<ActivityLoginSuccessBinding>(R.layout.activity_login_success) {
@@ -41,22 +39,52 @@ class LoginSuccessActivity : BaseActivity<ActivityLoginSuccessBinding>(R.layout.
                 loginSuccessViewModel.unlinkFromKakao()
             }
         }
-        loginSuccessViewModel.getUserInfo()
         observeUserInfo()
-        observeToastMessage(loginSuccessViewModel)
-        observeFinish(loginSuccessViewModel)
     }
 
     private fun observeUserInfo() {
-        lifecycleScope.launch {
-            loginSuccessViewModel.userInfoResult.collect { userInfo ->
-                if(userInfo != null) {
-                    LogUtil.d("사용자 정보 가져오기 성공!!\n" +
-                            "$userInfo")
-                    setData(userInfo)
-                    showEmptyDataScreen(false)
-                } else {
+        loginSuccessViewModel.userInfoState.observe(this) { uiState ->
+            when(uiState) {
+                is UserInfoState.Loading -> {
                     showEmptyDataScreen(true)
+                }
+                is UserInfoState.Error -> {
+                    LogUtil.e("Error", uiState.throwable)
+                    when(uiState.type) {
+                        UserInfoState.StateType.UserInfo -> {
+                            showToast("정보 가져오기 실패")
+                        }
+                        UserInfoState.StateType.Logout -> {
+                            showToast("로그아웃 실패. SDK 에서 토큰 삭제됨")
+                            finish()
+                        }
+                        UserInfoState.StateType.Unlink -> {
+                            showToast("연결 끊기 실패. SDK 에서 토큰 삭제됨")
+                            finish()
+                        }
+                    }
+                }
+                is UserInfoState.Success -> {
+                    when(uiState.type) {
+                        UserInfoState.StateType.UserInfo -> {
+                            if(uiState.userInfo != null) {
+                                showToast("정보 가져오기 성공")
+                                showEmptyDataScreen(false)
+                                setData(uiState.userInfo)
+                            } else {
+                                showToast("정보 가져오기 실패")
+                                showEmptyDataScreen(true)
+                            }
+                        }
+                        UserInfoState.StateType.Logout -> {
+                            showToast("로그아웃 성공. SDK 에서 토큰 삭제됨")
+                            finish()
+                        }
+                        UserInfoState.StateType.Unlink -> {
+                            showToast("연결 끊기 성공. SDK 에서 토큰 삭제됨")
+                            finish()
+                        }
+                    }
                 }
             }
         }

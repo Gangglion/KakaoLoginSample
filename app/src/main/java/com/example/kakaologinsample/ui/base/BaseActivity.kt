@@ -20,29 +20,9 @@ abstract class BaseActivity<T: ViewDataBinding>(private val layoutResId: Int): A
         mContext = this
     }
 
-    private fun makeToast(msg: String) {
+    fun showToast(msg: String) {
+        mToast?.cancel()
         mToast = Toast.makeText(mContext, msg, Toast.LENGTH_SHORT)
-    }
-
-    /**
-     * 토스트 메시지 관찰
-     */
-    protected fun observeToastMessage(viewModel: BaseViewModel) {
-        viewModel.toastMsg.observe(this) { msg ->
-            if(msg.isNotBlank()) {
-                mToast?.cancel()
-                makeToast(msg)
-                mToast?.show()
-            }
-        }
-    }
-
-    /**
-     * 종료 플래그 관찰
-     */
-    protected fun observeFinish(viewModel: BaseViewModel) {
-        viewModel.isFinish.observe(this) { isFinish ->
-            if(isFinish) finish()
-        }
+        mToast?.show()
     }
 }

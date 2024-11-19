@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.kakaologinsample.domain.model.Token
 import com.example.kakaologinsample.domain.usecase.KakaoAuthUseCase
 import com.example.kakaologinsample.domain.usecase.UserPrefUseCase
 import com.example.kakaologinsample.ui.base.BaseViewModel
-import com.kakao.sdk.auth.model.OAuthToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,30 +23,21 @@ class LoginViewModel @Inject constructor(
     private val _isExistToken: MutableLiveData<Boolean> = MutableLiveData(false)
     val isExistToken: LiveData<Boolean> = _isExistToken
 
-    private val _loginResult = MutableStateFlow<OAuthToken?>(null)
-    val loginResult: StateFlow<OAuthToken?> = _loginResult
+    private val _loginResult = MutableStateFlow<Token?>(null)
+    val loginResult: StateFlow<Token?> = _loginResult
 
-    fun loginWithKakao(context: Context) {
+    fun loginWithKakao(activityContext: Context) {
         viewModelScope.launch {
-            val result = kakaoAuthUseCase.login(context)
-            when(result.isSuccess) {
-                true -> {
-                    val oauthToken = result.getOrNull()
-                    if(oauthToken != null) {
-                        _loginResult.value = oauthToken
-                        // 로그인 성공 시 가져온 토큰 정보 DataStore 저장
-                        userPrefUseCase.saveUserToken(_loginResult.value!!.accessToken, _loginResult.value!!.refreshToken)
-                        _isExistToken.value = true // 토큰 존재 여부 갱신
-                        updateToastMsg("로그인 성공!!")
-                    } else {
-                        updateToastMsg("로그인 실패!!")
-
-                        _isExistToken.value = false // 토큰 존재 여부 갱신
-                    }
-                }
-                false -> {
-                    updateToastMsg("로그인 실패!!")
-                }
+            val token = kakaoAuthUseCase.login(activityContext)
+            if(token != null) {
+                _loginResult.value = token
+                // 로그인 성공 시 가져온 토큰 정보 DataStore 저장
+                userPrefUseCase.saveUserToken(_loginResult.value!!.accessToken, _loginResult.value!!.refreshToken)
+                _isExistToken.value = true // 토큰 존재 여부 갱신
+                updateToastMsg("로그인 성공!!")
+            } else {
+                updateToastMsg("로그인 실패!!")
+                _isExistToken.value = false // 토큰 존재 여부 갱신
             }
         }
     }

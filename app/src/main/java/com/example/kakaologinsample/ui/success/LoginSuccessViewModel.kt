@@ -22,27 +22,16 @@ class LoginSuccessViewModel @Inject constructor(
 
     fun getUserInfo() {
         viewModelScope.launch {
-            val result = kakaoAuthUseCase.getUserInfo()
-            when(result.isSuccess) {
-                true -> {
-                    val userInfo = result.getOrNull()
-                    if(userInfo != null) {
-                        _userInfoResult.value = userInfo
-                        // 가져온 사용자 Id DataStore 에 저장
-                        userPrefUseCase.saveUserId(_userInfoResult.value!!.id!!)
-                    } else {
-                        updateToastMsg("사용자 정보 가져오기 실패")
-                        // 사용자 정보 가져오기 실패 시, DataStore 에 저장된 값 전부 제거
-                        userPrefUseCase.clearAllPrefs()
-                        updateIsFinish(true)
-                    }
-                }
-                false -> {
-                    updateToastMsg("사용자 정보 가져오기 실패")
-                    // 사용자 정보 가져오기 실패 시, DataStore 에 저장된 값 전부 제거
-                    userPrefUseCase.clearAllPrefs()
-                    updateIsFinish(true)
-                }
+            val userInfo = kakaoAuthUseCase.getUserInfo()
+            if(userInfo != null) {
+                _userInfoResult.value = userInfo
+                // 가져온 사용자 Id DataStore 에 저장
+                userPrefUseCase.saveUserId(_userInfoResult.value!!.id!!)
+            } else {
+                updateToastMsg("사용자 정보 가져오기 실패")
+                // 사용자 정보 가져오기 실패 시, DataStore 에 저장된 값 전부 제거
+                userPrefUseCase.clearAllPrefs()
+                updateIsFinish(true)
             }
         }
     }

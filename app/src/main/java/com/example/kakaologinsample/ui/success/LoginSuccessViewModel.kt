@@ -26,6 +26,7 @@ class LoginSuccessViewModel @Inject constructor(
         viewModelScope.launch {
             kakaoRepository.getUserInfo()
                 .onStart { _userInfoState.value = UserInfoState.Loading }
+                .catch { _userInfoState.value = UserInfoState.Error(UserInfoState.StateType.UserInfo, it) }
                 .collect { result ->
                     result.fold(
                         onSuccess = { data ->
@@ -42,7 +43,7 @@ class LoginSuccessViewModel @Inject constructor(
     fun logoutFromKakao() {
         viewModelScope.launch {
             kakaoRepository.logout()
-                .catch { UserInfoState.Error(UserInfoState.StateType.Logout, it) }
+                .catch { _userInfoState.value = UserInfoState.Error(UserInfoState.StateType.Logout, it) }
                 .collect { result ->
                     dataStoreRepository.clearAllPrefs()
                     result.fold(

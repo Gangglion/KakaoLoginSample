@@ -10,31 +10,31 @@ object LogUtil {
 
     fun v(msg: String, tr: Throwable? = null) {
         if(isDev) {
-            Log.v(TAG, "💬 ${getLineNumber()}\n$msg", tr)
+            Log.v(TAG, "${getLineNumber()}\n\uD83D\uDCAC $msg", tr)
         }
     }
 
     fun d(msg: String, tr: Throwable? = null) {
         if(isDev) {
-            Log.d(TAG, "\uD83D\uDC1E ${getLineNumber()}\n$msg", tr)
+            Log.d(TAG, "${getLineNumber()}\n\uD83D\uDC1E $msg", tr)
         }
     }
 
     fun i(msg: String, tr: Throwable? = null) {
         if(isDev) {
-            Log.i(TAG, "ℹ\uFE0F ${getLineNumber()}\n$msg", tr)
+            Log.i(TAG, "${getLineNumber()}\nℹ\uFE0F $msg", tr)
         }
     }
 
     fun w(msg: String, tr: Throwable? = null) {
         if(isDev) {
-            Log.w(TAG, "⚠\uFE0F ${getLineNumber()}\n$msg", tr)
+            Log.w(TAG, "${getLineNumber()}\n⚠\uFE0F $msg", tr)
         }
     }
 
     fun e(msg: String, tr: Throwable? = null) {
         if(isDev) {
-            Log.e(TAG, "❌ ${getLineNumber()}\n$msg", tr)
+            Log.e(TAG, "${getLineNumber()}\n❌ $msg", tr)
         }
     }
 

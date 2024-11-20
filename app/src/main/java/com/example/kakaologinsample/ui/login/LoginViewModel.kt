@@ -1,4 +1,4 @@
-package com.example.kakaologinsample.ui.auth
+package com.example.kakaologinsample.ui.login
 
 import android.content.Context
 import androidx.lifecycle.LiveData
@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.kakaologinsample.data.datastore.repository.DataStoreRepository
 import com.example.kakaologinsample.data.kakao.model.Token
 import com.example.kakaologinsample.data.kakao.repository.KakaoRepository
-import com.example.kakaologinsample.ui.auth.LoginUiState.Error
-import com.example.kakaologinsample.ui.auth.LoginUiState.Success
+import com.example.kakaologinsample.ui.login.LoginUiState.Error
+import com.example.kakaologinsample.ui.login.LoginUiState.Success
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
@@ -24,7 +24,7 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableLiveData<LoginUiState>()
     val uiState: LiveData<LoginUiState> = _uiState
 
-    init {
+    fun checkTokens() {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             val accessToken = dataStoreRepository.accessToken.first()

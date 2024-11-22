@@ -5,15 +5,17 @@ import com.example.kakaologinsample.data.datastore.repository.DataStoreRepositor
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.components.FragmentComponent
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
-interface DataStoreModule {
-    @Singleton
+@InstallIn(ViewModelComponent::class)
+abstract class DataStoreModule {
     @Binds
-    fun bindsDataStoreRepository(
+    abstract fun bindsDataStoreRepository(
         dataStoreRepositoryImpl: DataStoreRepositoryImpl
     ) : DataStoreRepository
 }

@@ -1,13 +1,13 @@
 package com.example.kakaologinsample.ui.success
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kakaologinsample.data.datastore.repository.DataStoreRepository
 import com.example.kakaologinsample.data.kakao.model.UserInfo
 import com.example.kakaologinsample.data.kakao.repository.KakaoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -19,8 +19,8 @@ class LoginSuccessViewModel @Inject constructor(
     private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
 
-    private val _userInfoState = MutableLiveData<UserInfoState>()
-    val userInfoState: LiveData<UserInfoState> = _userInfoState
+    private val _userInfoState = MutableStateFlow<UserInfoState>(UserInfoState.Loading)
+    val userInfoState: StateFlow<UserInfoState> = _userInfoState
 
     init {
         viewModelScope.launch {
